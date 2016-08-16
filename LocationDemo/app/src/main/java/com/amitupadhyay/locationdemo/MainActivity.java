@@ -3,6 +3,8 @@ package com.amitupadhyay.locationdemo;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,6 +15,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener {
 
@@ -71,6 +75,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         double longitude = location.getLongitude();
 
         txtLocation.setText("Location " + latitude + ", " + longitude);
+
+        // reverse Geocoding : here we use Geocoder
+
+        try {
+            Geocoder geocoder = new Geocoder(this);
+            List<Address> addrsList = geocoder.getFromLocation(latitude, longitude, 2); // 2 means we are requesting only 2 addresses nearest to my latitude and longitude
+            // so reverse geocoding will not give us the precise address rather it will give us the closest address from the latitude and longitude we are supplying from googles database.
+
+            if (addrsList != null && addrsList.size() > 0)
+            {
+                Address address = addrsList.get(0);
+                StringBuilder builder = new StringBuilder();
+
+                for(int i = 0; i < address.getMaxAddressLineIndex(); ++i)
+                {
+                    builder.append(address.getAddressLine(i)+"\n");
+                }
+                txtLocation.setText(builder.toString());
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Please grant permission in Settings", Toast.LENGTH_LONG).show();
